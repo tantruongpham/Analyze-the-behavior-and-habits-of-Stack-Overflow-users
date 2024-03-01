@@ -1,0 +1,41 @@
+version: '3.7' 
+
+services:
+  mongo:
+    build: . 
+    hostname: mongo
+    user: root
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: stackoverflow
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+    volumes:
+      - mongo-db-volume:/data/mongo/db/
+      - ./data/:/usr/local/share/
+
+  spark-master:
+    image: bitnami/spark:3.4.1
+    user: root
+    hostname: spark
+    environment:
+      SPARK_MODE: master
+    ports:
+      - "8181:8080"
+    volumes:
+      - ./spark/:/usr/local/share/spark/
+      - ./data:/usr/local/share/data/
+
+
+  spark-worker:
+    image: bitnami/spark:3.4.1
+    user: root
+    environment:
+      SPARK_MODE: worker
+      SPARK_MASTER_URL: spark://spark:7077
+      SPARK_WORKER_MEMORY: 4G
+      SPARK_WORKER_CORES: 1
+
+volumes:
+  mongo-db-volume:
